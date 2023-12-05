@@ -14,6 +14,18 @@ const Schedule = () => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
 
+  const itemsPerPage = 20; // Adjust the number of items per page as needed
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(appointments.length / itemsPerPage);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAppointments = appointments.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
@@ -115,8 +127,8 @@ const Schedule = () => {
       <div className="absolute z-10 bg-secondary">
         <Sidebar />
       </div>
-      <div className="relative flex-1 p-2 ml-14 md:p-8 ">
-        <div className="p-5 md:m-10 lg:p-16 ">
+      <div className="relative flex-1 p-2 ml-12 md:p-8 ">
+        <div className="p-5 md:mx-10 lg:p-16 ">
           <h1 className="mb-4 text-2xl font-semibold md:text-4xl font-roboto">
             Make an Appointment
           </h1>
@@ -126,16 +138,22 @@ const Schedule = () => {
           </p>
 
           <div className="flex flex-col justify-center gap-2 mt-10 xl:flex-row">
-            <div className="w-1/3">
+            <div className="flex flex-col-reverse xl:flex-col lg:w-full xl:w-1/4">
               <Calendar onDateChange={handleDateChange} className="shadow-lg" />
-              <p className="text-sm font-roboto">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. In
-                molestias eum porro rem quos laborum, quod dolore reiciendis
-                nisi quae accusamus, aliquam ratione facere ab possimus
-                laudantium libero tempore rerum.
-              </p>
+
+              <div className="p-5 text-sm border rounded">
+                <h1 className="mb-5 text-xl font-semibold font-roboto">
+                  Setting an Appointment Guide
+                </h1>
+                {steps.map((step, index) => (
+                  <p key={index} className="mt-2 font-roboto">
+                    <span className="font-semibold">{step.title}</span>{" "}
+                    {step.content}
+                  </p>
+                ))}
+              </div>
             </div>
-            <div className="w-2/3 ml-10">
+            <div className="ml-10 xl:w-3/4 ">
               <Time onTimeChange={handleTimeChange} />
 
               <button
@@ -148,17 +166,18 @@ const Schedule = () => {
                 {loading ? "Submitting..." : "Submit Appointment"}
               </button>
               <div>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 lg:flex-row">
                   <h2 className="mt-10 mb-5 text-2xl font-semibold font-roboto">
                     Appointments Schedule:
                   </h2>
-                  <div className="w-1/4 mt-4">
+                  {/*For Day*/}
+                  <div className="mt-4">
                     <label className="block text-sm font-roboto text-shade">
                       Filter by Day:
                     </label>
                     <select
                       onChange={(e) => handleDayChange(e.target.value)}
-                      value={selectedDay}
+                      value={selectedDay || ""}
                       className="block w-full px-3 py-2 mt-1 bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                     >
                       <option value="">All Days</option>
@@ -173,13 +192,13 @@ const Schedule = () => {
                   </div>
 
                   {/* Filter for Month */}
-                  <div className="w-1/4 mt-4">
+                  <div className="mt-4">
                     <label className="block text-sm font-roboto text-shade">
                       Filter by Month:
                     </label>
                     <select
                       onChange={(e) => handleMonthChange(e.target.value)}
-                      value={selectedMonth}
+                      value={selectedMonth || ""}
                       className="block w-full px-3 py-2 mt-1 bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                     >
                       <option value="">All Months</option>
@@ -201,46 +220,48 @@ const Schedule = () => {
                 {loading ? (
                   <p>Retrieving Appointments...</p>
                 ) : (
-                  <div
-                    className="grid grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 font-roboto"
-                    style={{ maxHeight: "500px" }}
-                  >
-                    {appointments
-                      .filter(
-                        (appointment) =>
-                          (!selectedDay ||
-                            new Date(appointment.date).toLocaleDateString(
-                              "en-US",
-                              { weekday: "short" }
-                            ) === selectedDay) &&
-                          (!selectedMonth ||
-                            new Date(appointment.date).toLocaleDateString(
-                              "en-US",
-                              { month: "2-digit" }
-                            ) === selectedMonth)
-                      )
-                      .map((appointment, index) => {
-                        const formattedDate = new Intl.DateTimeFormat("en-US", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        }).format(new Date(appointment.date));
-
-                        const time = appointment.time.split(":");
-                        const formattedTime =
-                          `${parseInt(time[0], 10) % 12 || 12}:${time[1]} ` +
-                          `${parseInt(time[0], 10) < 12 ? "AM" : "PM"}`;
-
-                        return (
-                          <div
-                            key={index}
-                            className="px-3 py-5 mb-2 text-center duration-300 border hover:bg-primary hover:text-secondary"
-                          >
-                            Date: {formattedDate}, Time: {formattedTime}
-                          </div>
-                        );
-                      })}
+                  <div className="mt-4">
+                  <div className="grid grid-cols-1 gap-2 p-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 font-roboto">
+                    {currentAppointments.map((appointment, index) => {
+                      const formattedDate = new Intl.DateTimeFormat("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }).format(new Date(appointment.date));
+            
+                      const time = appointment.time.split(":");
+                      const formattedTime = `${
+                        parseInt(time[0], 10) % 12 || 12
+                      }:${time[1]} ${
+                        parseInt(time[0], 10) < 12 ? "AM" : "PM"
+                      }`;
+            
+                      return (
+                        <div
+                          key={index}
+                          className="px-3 py-5 mb-2 text-center duration-300 border rounded hover:bg-primary hover:text-secondary"
+                        >
+                          Date: {formattedDate}, <br /> Time: {formattedTime}
+                        </div>
+                      );
+                    })}
                   </div>
+            
+                  {/* Pagination Controls */}
+                  <div className="flex justify-center mt-4">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`mx-1 px-3 py-2 rounded ${
+                          page === currentPage ? "bg-primary text-secondary" : "bg-secondary text-primary hover:bg-primary hover:text-secondary"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 )}
               </div>
             </div>
@@ -250,5 +271,36 @@ const Schedule = () => {
     </div>
   );
 };
+
+const steps = [
+  {
+    title: "Check Availability:",
+    content: "Make sure to check the availability of the appointment slots.",
+  },
+  {
+    title: "Check Year/Month/Day:",
+    content:
+      "Review the available dates and choose a suitable day for your appointment.",
+  },
+  {
+    title: "Check the Time:",
+    content: "Take note of the available time slots on the chosen day.",
+  },
+  {
+    title: "Select Year/Month/Day:",
+    content:
+      "Use the calendar to select the desired Year, Month, and Day for your appointment.",
+  },
+  {
+    title: "Select Time Frame:",
+    content:
+      "Choose a specific time frame from the available slots on the selected day.",
+  },
+  {
+    title: "Submit it:",
+    content:
+      'Once you\'ve chosen the date and time, click the "Submit Appointment" button to confirm your appointment.',
+  },
+];
 
 export default Schedule;
