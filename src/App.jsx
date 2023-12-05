@@ -7,9 +7,10 @@ import Dashboard from "./components/dashboard/Dashboard";
 import Event from "./pages/Event";
 import Contact from "./pages/Contact";
 import Schedule from "./pages/Schedule";
+
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/FacilitEase">
       <Routes>
         <Route path="/" element={<SignIn />} />
         <Route path="/signin" element={<SignIn />} />
@@ -17,7 +18,6 @@ function App() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/event" element={<Event />} />
         <Route path="/contact" element={<Contact />} />
-        
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
