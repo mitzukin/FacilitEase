@@ -1,4 +1,4 @@
-// Schedule.jsx
+// Import React and other necessary modules/components
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Calendar from "../components/calendar";
@@ -6,25 +6,47 @@ import Time from "../components/time";
 import { db } from "../firebase";
 import { ref, push, get } from "firebase/database";
 import { useMemo } from "react";
+
+// Define the Schedule component
 const Schedule = () => {
+  // State variables
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedTime, setSelectedTime] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
-
-  const itemsPerPage = 20;
+  const [buildingName, setBuildingName] = useState("");
+  const [floor, setFloor] = useState("");
+  const [room, setRoom] = useState("");
+  const [isOverlapModalOpen, setOverlapModalOpen] = useState(false);
+  const itemsPerPage = 8;
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedBuilding, setSelectedBuilding] = useState("");
+  const [isDuplicateModalOpen, setDuplicateModalOpen] = useState(false);
+  const [isIncompleteModalOpen, setIncompleteModalOpen] = useState(false);
 
- 
+  const closeIncompleteModal = () => {
+    setIncompleteModalOpen(false);
+  };
+  const closeDuplicateModal = () => {
+    setDuplicateModalOpen(false);
+  };
 
+  const handleBuildingChange = (building) => {
+    console.log("Selected Building:", building);
+    setSelectedBuilding(building);
+  };
+
+  // Event handlers for date, time, day, and month changes
   const handleDateChange = (date) => {
+    console.log("Selected Date:", date);
     setSelectedDate(date);
   };
 
-  const handleTimeChange = (time) => {
-    setSelectedTime(time);
+  const handleTimeChange = (timeRange) => {
+    console.log("Selected Time:", timeRange);
+    setSelectedTime(timeRange);
   };
 
   const handleDayChange = (day) => {
@@ -34,29 +56,126 @@ const Schedule = () => {
   const handleMonthChange = (month) => {
     setSelectedMonth(month);
   };
+  // Fetch appointments on component mount
 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setLoading(true);
+
+      try {
+        const appointmentsRef = ref(db, "appointments");
+        const snapshot = await get(appointmentsRef);
+
+        if (snapshot.exists()) {
+          const appointmentsData = [];
+
+          snapshot.forEach((childSnapshot) => {
+            const appointment = childSnapshot.val();
+            // Ensure that date is a valid date object
+            if (appointment.date && typeof appointment.date === "string") {
+              appointment.date = new Date(appointment.date);
+            }
+            appointmentsData.push(appointment);
+          });
+
+          setAppointments(appointmentsData);
+        } else {
+          console.log("No appointments data available");
+          // You might want to set an empty array or handle this case differently
+          setAppointments([]);
+        }
+      } catch (error) {
+        console.error("Error fetching appointments:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Call the fetchAppointments function only when the component mounts
+    fetchAppointments();
+
+    // You might want to add dependencies to this array if there are specific dependencies
+    // that should trigger a re-fetch when they change.
+  }, []);
+
+  // Event handler for form submission
   const handleSubmit = async () => {
     if (loading) return;
 
     setLoading(true);
 
     try {
-      if (selectedDate && selectedTime) {
+      if (selectedDate && selectedTime.length === 2) {
         const formattedDate = selectedDate.toISOString();
-        const formattedTime = selectedTime.format("HH:mm");
+        const [formattedStartTime, formattedEndTime] = selectedTime;
 
+        // Check for duplicate appointment
+        const isDuplicate = appointments.some(
+          (appointment) =>
+            appointment.date.toISOString() === formattedDate &&
+            appointment.startTime === formattedStartTime &&
+            appointment.endTime === formattedEndTime &&
+            appointment.buildingName === buildingName &&
+            appointment.floor === floor &&
+            appointment.room === room
+        );
+
+        if (isDuplicate) {
+          setDuplicateModalOpen(true);
+
+          return;
+        }
+        if (!floor || !room) {
+          console.error("Please provide floor and room information");
+          setIncompleteModalOpen(true);
+          return;
+        }
+
+        // Check for overlapping schedules
+        const isOverlap = appointments.some(
+          (appointment) =>
+            appointment.date.toISOString() === formattedDate &&
+            ((formattedStartTime >= appointment.startTime &&
+              formattedStartTime < appointment.endTime) ||
+              (formattedEndTime > appointment.startTime &&
+                formattedEndTime <= appointment.endTime) ||
+              (formattedStartTime <= appointment.startTime &&
+                formattedEndTime >= appointment.endTime)) &&
+            appointment.buildingName === buildingName &&
+            appointment.floor === floor &&
+            appointment.room === room
+        );
+
+        if (isOverlap) {
+          console.log("Overlap detected. Opening modal.");
+          // Handle the overlap case (e.g., show an error message)
+          setOverlapModalOpen(true);
+          console.log("Modal opened.");
+          return;
+        }
+
+        // Continue with your logic
         const appointmentsRef = ref(db, "appointments");
         await push(appointmentsRef, {
           date: formattedDate,
-          time: formattedTime,
+          startTime: formattedStartTime,
+          endTime: formattedEndTime,
+          buildingName,
+          floor,
+          room,
         });
 
         console.log(
           "Appointment submitted to Firebase:",
           formattedDate,
-          formattedTime
+          formattedStartTime,
+          formattedEndTime,
+          buildingName,
+          floor,
+          room
         );
 
+        // Fetch and update appointments
         const updatedAppointmentsRef = ref(db, "appointments");
         const snapshot = await get(updatedAppointmentsRef);
 
@@ -64,7 +183,7 @@ const Schedule = () => {
           const appointmentsData = [];
           snapshot.forEach((childSnapshot) => {
             const appointment = childSnapshot.val();
-            appointment.date = new Date(appointment.date); // Parse the date string to a Date object
+            appointment.date = new Date(appointment.date);
             appointmentsData.push(appointment);
           });
 
@@ -82,57 +201,48 @@ const Schedule = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      setLoading(true);
-
-      try {
-        const appointmentsRef = ref(db, "appointments");
-        const snapshot = await get(appointmentsRef);
-
-        if (snapshot.exists()) {
-          const appointmentsData = [];
-          snapshot.forEach((childSnapshot) => {
-            const appointment = childSnapshot.val();
-            appointment.date = new Date(appointment.date); // Parse the date string to a Date object
-            appointmentsData.push(appointment);
-          });
-
-          setAppointments(appointmentsData);
-        } else {
-          console.log("No data available");
-        }
-      } catch (error) {
-        console.error("Error fetching appointments:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
-  }, []); // Run once on component mount
-
   // Filter appointments based on selected day and month
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment) => {
-      if (selectedDay !== null && selectedDay !== "" && appointment.date.getDay() !== parseInt(selectedDay)) {
+      if (
+        selectedDay !== null &&
+        selectedDay !== "" &&
+        appointment.date.getDay() !== parseInt(selectedDay)
+      ) {
         return false;
       }
 
-      if (selectedMonth !== null && selectedMonth !== "" && (appointment.date.getMonth() + 1) !== parseInt(selectedMonth)) {
+      if (
+        selectedMonth !== null &&
+        selectedMonth !== "" &&
+        appointment.date.getMonth() + 1 !== parseInt(selectedMonth)
+      ) {
+        return false;
+      }
+      if (
+        selectedBuilding !== "" &&
+        appointment.buildingName !== selectedBuilding
+      ) {
         return false;
       }
 
       return true;
     });
-  }, [appointments, selectedDay, selectedMonth]);
+  }, [appointments, selectedDay, selectedMonth, selectedBuilding]);
 
+  // Pagination calculations
   const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentAppointments = filteredAppointments.slice(indexOfFirstItem, indexOfLastItem);
+  const currentAppointments = filteredAppointments.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const closeOverlapModal = () => {
+    setOverlapModalOpen(false);
+  };
 
+  // JSX structure
   return (
     <div className="flex">
       {/* Sidebar component */}
@@ -171,18 +281,111 @@ const Schedule = () => {
 
             <div className="ml-10 xl:w-3/4">
               {/* Time component */}
-              <Time onTimeChange={handleTimeChange} />
+              <Time
+                onTimeChange={handleTimeChange}
+                onDateChange={handleDateChange}
+              />
+
+              <div className="flex flex-col gap-2 mt-5 md:flex-row">
+                {/* Building selection */}
+                <select
+                  onChange={(e) => setBuildingName(e.target.value)}
+                  value={buildingName}
+                  className="px-4 py-2 text-sm border rounded text-primary focus:outline-none"
+                >
+                  <option value="">Building Name</option>
+                  <option value="Wellness Bldg.">Wellness Bldg.</option>
+                  <option value="Profeta Bldg.">Profeta Bldg</option>
+                  <option value="JVE Bldg.">JVE Bldg.</option>
+                  <option value="Estolas Bldg.">Estolas Bldg.</option>
+                  <option value="ITC Bldg.">ITC Bldg.</option>
+                  <option value="New Engineer Bldg.">New Engineer Bldg.</option>
+                  <option value="Alumni Bldg.">Alumni Bldg.</option>
+                  <option value="SNAGAH">SNAGAH</option>
+                  <option value="R&D">R&D</option>
+                  <option value="Main Academic Bldg.">
+                    Main Academic Bldg.
+                  </option>
+                  <option value="Old Bldg">Old Bldg.</option>
+                </select>
+
+                {/* Floor input */}
+                <input
+                  type="text"
+                  value={floor}
+                  onChange={(e) => setFloor(e.target.value)}
+                  className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none"
+                  placeholder="Floor"
+                  required
+                />
+
+                {/* Room input */}
+                <input
+                  type="text"
+                  value={room}
+                  onChange={(e) => setRoom(e.target.value)}
+                  className="px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none"
+                  placeholder="Room"
+                  required
+                />
+              </div>
 
               {/* Submit button */}
               <button
                 onClick={handleSubmit}
-                className={`px-4 py-3 mt-4  rounded-md text-secondary text-sm font-roboto bg-primary ${
+                className={`px-4 py-3 mt-4 rounded-md text-secondary text-sm font-roboto bg-primary ${
                   loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={loading}
               >
                 {loading ? "Submitting..." : "Submit Appointment"}
               </button>
+              {isIncompleteModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="p-5 bg-white rounded-md">
+                    <p>Please provide floor and room information.</p>
+                    <button
+                      onClick={closeIncompleteModal}
+                      className="px-4 py-2 mt-3 text-white rounded-md bg-primary"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+              {/* Duplicate Appointment Modal */}
+              {isDuplicateModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="p-5 bg-white rounded-md">
+                    <p>
+                      Duplicate appointment found. Please choose a different
+                      date or time.
+                    </p>
+                    <button
+                      onClick={closeDuplicateModal}
+                      className="px-4 py-2 mt-3 text-white rounded-md bg-primary"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+              {isOverlapModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="p-5 bg-white rounded-md">
+                    <p>
+                      Time range overlaps with an existing appointment. Please
+                      choose a different time.
+                    </p>
+                    <button
+                      onClick={closeOverlapModal}
+                      className="px-4 py-2 mt-3 text-white rounded-md bg-primary"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Filters for day and month */}
               <div className="flex flex-col gap-2 lg:flex-row">
@@ -194,7 +397,7 @@ const Schedule = () => {
                   <select
                     onChange={(e) => handleDayChange(e.target.value)}
                     value={selectedDay || ""}
-                    className="block w-full px-3 py-2 mt-1 bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                    className="block w-full px-3 py-2 mt-1 text-sm bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                   >
                     <option value="">All Days</option>
                     <option value="0">Sun</option>
@@ -210,12 +413,12 @@ const Schedule = () => {
                 {/* Filter by Month */}
                 <div className="mt-4">
                   <label className="block text-sm font-roboto text-shade">
-                    Filter by Month:
+                    Month:
                   </label>
                   <select
                     onChange={(e) => handleMonthChange(e.target.value)}
                     value={selectedMonth || ""}
-                    className="block w-full px-3 py-2 mt-1 bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                    className="block w-full px-3 py-2 mt-1 text-sm bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                   >
                     <option value="">All Months</option>
                     <option value="1">Jan</option>
@@ -232,57 +435,267 @@ const Schedule = () => {
                     <option value="12">Dec</option>
                   </select>
                 </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-roboto text-shade">
+                    Building:
+                  </label>
+                  <select
+                    onChange={(e) => handleBuildingChange(e.target.value)}
+                    value={selectedBuilding}
+                    className="px-3 py-2 mt-1 text-sm bg-white border rounded-md shadow-sm border-shade focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  >
+                    <option value="">All Buildings</option>
+                    {/* Add options for each building */}
+                    <option value="Wellness Bldg.">Wellness Bldg.</option>
+                    <option value="Profeta Bldg.">Profeta Bldg</option>
+                    <option value="JVE Bldg.">JVE Bldg.</option>
+                    <option value="Estolas Bldg.">Estolas Bldg.</option>
+                    <option value="ITC Bldg.">ITC Bldg.</option>
+                    <option value="New Engineer Bldg.">
+                      New Engineer Bldg.
+                    </option>
+                    <option value="Alumni Bldg.">Alumni Bldg.</option>
+                    <option value="SNAGAH">SNAGAH</option>
+                    <option value="R&D">R&D</option>
+                    <option value="Main Academic Bldg.">
+                      Main Academic Bldg.
+                    </option>
+                    <option value="Old Bldg">Old Bldg.</option>
+                  </select>
+                </div>
               </div>
 
               {/* Display filtered appointments */}
-              {loading ? (
-                <p>Retrieving Appointments...</p>
-              ) : (
-                <div className="mt-4">
-                  <div className="grid grid-cols-1 gap-2 p-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 font-roboto">
-                    {currentAppointments.map((appointment, index) => {
-                      const formattedDate = new Intl.DateTimeFormat("en-US", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      }).format(new Date(appointment.date));
-
-                      const time = appointment.time.split(":");
-                      const formattedTime = `${
-                        parseInt(time[0], 10) % 12 || 12
-                      }:${time[1]} ${parseInt(time[0], 10) < 12 ? "AM" : "PM"}`;
-
-                      return (
-                        <div
-                          key={index}
-                          className="px-3 py-5 mb-2 text-center duration-300 border rounded hover:bg-primary hover:text-secondary"
-                        >
-                          Date: {formattedDate}, <br /> Time: {formattedTime}
-                        </div>
-                      );
-                    })}
+              <div className="hidden lg:flex">
+                {loading ? (
+                  <p>Retrieving Appointments...</p>
+                ) : filteredAppointments.length === 0 ? (
+                  <div className="  flex items-center mt-10 rounded justify-center h-[400px] bg-gray-100 w-auto">
+                    <p className="text-2xl font-roboto">
+                      No Records to Display
+                    </p>
                   </div>
+                ) : (
+                  <div className="w-full mt-4">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                          >
+                            Date
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                          >
+                            Start Time
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                          >
+                            End Time
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                          >
+                            Building
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                          >
+                            Floor
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                          >
+                            Room
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {currentAppointments.map((appointment, index) => {
+                          const formattedDate = new Intl.DateTimeFormat(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          ).format(new Date(appointment.date));
 
-                  {/* Pagination Controls */}
-                  <div className="flex justify-center mt-4">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`mx-1 px-3 py-2 rounded ${
-                            page === currentPage
-                              ? "bg-primary text-secondary"
-                              : "bg-secondary text-primary hover:bg-primary hover:text-secondary"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      )
-                    )}
+                          const startTime = appointment.startTime
+                            ? appointment.startTime.split(":")
+                            : [];
+                          const formattedStartTime = `${
+                            parseInt(startTime[0], 10) % 12 || 12
+                          }:${startTime[1]} ${
+                            parseInt(startTime[0], 10) < 12 ? "AM" : "PM"
+                          }`;
+
+                          const endTime = appointment.endTime
+                            ? appointment.endTime.split(":")
+                            : [];
+                          const formattedEndTime = `${
+                            parseInt(endTime[0], 10) % 12 || 12
+                          }:${endTime[1]} ${
+                            parseInt(endTime[0], 10) < 12 ? "AM" : "PM"
+                          }`;
+
+                          return (
+                            <tr key={index} className="hover:bg-gray-100">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {formattedDate}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {formattedStartTime}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {formattedEndTime}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {appointment.buildingName}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {appointment.floor}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {appointment.room}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    {/* Pagination Controls */}
+                    <div className="flex justify-center mt-4">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`mx-1 px-3 py-2 rounded ${
+                              page === currentPage
+                                ? "bg-primary text-secondary"
+                                : "bg-secondary text-primary hover:bg-primary hover:text-secondary"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              <div className="lg:hidden">
+                {loading ? (
+                  <p>Retrieving Appointments...</p>
+                ) : filteredAppointments.length === 0 ? (
+                  <div className="flex items-center mt-10 rounded justify-center h-[400px] bg-gray-100 w-auto">
+                    <p className="text-2xl font-roboto">
+                      No Records to Display
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4">
+                    <div className="grid grid-cols-1 gap-2 p-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 font-roboto">
+                      {currentAppointments.map((appointment, index) => {
+                        const formattedDate = new Intl.DateTimeFormat("en-US", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }).format(new Date(appointment.date));
+
+                        const startTime = appointment.startTime
+                          ? appointment.startTime.split(":")
+                          : [];
+                        const formattedStartTime = `${
+                          parseInt(startTime[0], 10) % 12 || 12
+                        }:${startTime[1]} ${
+                          parseInt(startTime[0], 10) < 12 ? "AM" : "PM"
+                        }`;
+
+                        const endTime = appointment.endTime
+                          ? appointment.endTime.split(":")
+                          : [];
+                        const formattedEndTime = `${
+                          parseInt(endTime[0], 10) % 12 || 12
+                        }:${endTime[1]} ${
+                          parseInt(endTime[0], 10) < 12 ? "AM" : "PM"
+                        }`;
+
+                        return (
+                          <div
+                            key={index}
+                            className="px-3 py-5 mb-2 border rounded "
+                          >
+                            <p>
+                              {" "}
+                              <span className="font-semibold">Date: </span>
+                              {formattedDate}
+                            </p>
+                            <p>
+                              {" "}
+                              <span className="font-semibold">
+                                Start Time:
+                              </span>{" "}
+                              {formattedStartTime}
+                            </p>
+                            <p>
+                              {" "}
+                              <span className="font-semibold">End Time: </span>
+                              {formattedEndTime}
+                            </p>
+                            <p>
+                              {" "}
+                              <span className="font-semibold">
+                                Building:
+                              </span>{" "}
+                              {appointment.buildingName}
+                            </p>
+                            <p>
+                              {" "}
+                              <span className="font-semibold">Floor: </span>
+                              {appointment.floor}
+                            </p>
+                            <p>
+                              {" "}
+                              <span className="font-semibold">Room: </span>
+                              {appointment.room}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="flex justify-center mt-4">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`mx-1 px-3 py-2 rounded ${
+                              page === currentPage
+                                ? "bg-primary text-secondary"
+                                : "bg-secondary text-primary hover:bg-primary hover:text-secondary"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

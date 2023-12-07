@@ -1,21 +1,38 @@
-import React from 'react';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { TimeField } from '@mui/x-date-pickers/TimeField';
+import React from "react";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { MultiInputTimeRangeField } from "@mui/x-date-pickers-pro/MultiInputTimeRangeField";
+
+// ...
 
 const Time = ({ onTimeChange }) => {
-  const handleTimeChange = (time) => {
-    // Call the parent component's callback function with the selected time
-    onTimeChange(time);
+  const handleTimeChange = (timeRange) => {
+    const [startTime, endTime] = timeRange;
+
+    if (startTime && endTime && startTime.isValid() && endTime.isValid()) {
+      const formattedStartTime = startTime.format("HH:mm");
+      const formattedEndTime = endTime.format("HH:mm");
+
+      onTimeChange([formattedStartTime, formattedEndTime]);
+    }
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DemoContainer components={['TimeField']}>
-        {/* Pass handleTimeChange as a prop to TimeField */}
-        <TimeField label="Basic time field" onChange={handleTimeChange} />
-      </DemoContainer>
+      <div className="flex flex-col">
+        <MultiInputTimeRangeField
+          slotProps={{
+            textField: ({ position }) => ({
+              label: position === "start" ? "From" : "To",
+              InputProps: {
+                className: "mb-2", // Add margin-bottom for spacing
+              },
+            }),
+          }}
+          onChange={handleTimeChange}
+          className="w-full sm:w-[400px]" // Set width for larger screens
+        />
+      </div>
     </LocalizationProvider>
   );
 };
