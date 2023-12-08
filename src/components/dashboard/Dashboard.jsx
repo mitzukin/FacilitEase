@@ -46,11 +46,11 @@ const Dashboard = () => {
         <Sidebar />
       </div>
     
-      <div className="flex items-center justify-center h-full px-20 ml-2">
+      <div className="flex items-center justify-center h-full ml-2">
         <div className="flex flex-col mt-20 bg-white rounded-lg lg:px-56 lg:flex-row">
           <div className="flex flex-col lg:w-1/2">
             <div className="mb-8 font-roboto">
-              <h1 className="px-4 mt-20 text-5xl font-bold lg:text-6xl">
+              <h1 className="px-2 mt-20 text-5xl font-bold lg:text-6xl">
                 Elevate Efficiency: Your All-in-One Facility Management Solution
               </h1>
               <p className="px-4 mt-5 text-shade">
@@ -71,7 +71,7 @@ const Dashboard = () => {
             <div className="absolute right-0 top-32">
               <img src={Rizal} alt="" />
             </div>
-            <div className="w-[400px] border-b border-primary mx-auto mt-16"></div>
+            <div className="w-[300px] border-b border-primary mx-auto mt-16"></div>
             <h1 className="mt-5 font-semibold text-center font-roboto">
               Cities Of Mandaluyong and Pasig
             </h1>

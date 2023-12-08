@@ -107,7 +107,7 @@ const Event = () => {
       </div>
       <div className="flex flex-col pt-32 text-center md:pt-10">
         <h1 className="mb-2 text-5xl font-bold md:text-7xl">EVENT SCHEDULE </h1>
-        <p className="mb-5">
+        <p className="mb-5 text-center">
           {" "}
           Schedule your time for a seamless blend of efficiency and enjoyment.
         </p>
@@ -116,7 +116,7 @@ const Event = () => {
         {" "}
         <div className="xl:px-5 lg:w-1/2">
           <form
-            className="flex px-5 mx-auto flex-col w-[400px] lg:px-5 "
+            className="flex mx-auto flex-col p-2 w-[350px] lg:px-5 "
             onSubmit={handleSubmit}
           >
             <p className="mt-5 mb-10 text-center md:text-sm">

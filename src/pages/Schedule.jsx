@@ -253,7 +253,7 @@ const Schedule = () => {
         <MobileNavbar />
       </div>
 
-      <div className="relative flex-1 p-2 mt-16 md:mt-0 md:p-8 ">
+      <div className="relative flex-1 mt-16 md:mt-0 md:p-8 ">
         <div className="p-5 mx-auto text-center md:mx-10 lg:p-16">
           <h1 className="mb-4 text-4xl font-semibold md:text-6xl font-roboto">
             Make an Appointment

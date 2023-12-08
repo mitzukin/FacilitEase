@@ -22,7 +22,7 @@ const Contact = () => {
             <h1 className="text-5xl font-extrabold xl:text-8xl">
               CONTACT INFO
             </h1>
-            <p className="w-[380px] md:w-[500px] p-2 mt-5">
+            <p className="w-[350px] md:w-[500px] p-2 mt-5">
               {" "}
               Connecting with FacilitEase is just a click away! Whether you have
               questions, need support, or want to explore opportunities, our
@@ -33,11 +33,11 @@ const Contact = () => {
             {socials.map((social, index) => (
               <div key={index} className="flex gap-2 px-1 my-4">
                 <div className="">
-                  <img src={social.logo} alt="" className="" />
+                  <img src={social.logo} alt="" className="w-full h-full" />
                 </div>
                 <div className="text-xs">
                   <h3 className="font-bold">{social.title}</h3>
-                  <p className="w-[300px] md:w-[500px]">{social.content}</p>
+                  <p className="w-[250px] md:w-[500px]">{social.content}</p>
                 </div>
               </div>
             ))}
