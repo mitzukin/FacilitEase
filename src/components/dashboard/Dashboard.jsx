@@ -97,11 +97,11 @@ const Dashboard = () => {
           precision and comfort throughout your facilities
         </p>
 
-        <div className="flex flex-col items-center lg:px-40 lg:gap-20 font-roboto lg:flex-row lg:justify-center lg:mt-28">
+        <div className="flex flex-col items-center xl:px-10 xl:gap-2 font-roboto lg:flex-row lg:justify-center lg:mt-28">
           <div className="flex flex-col px-5 py-20 mx-4 my-4 text-center rounded-lg md:px-10 md:py-24 bg-primary text-secondary ">
             <img src={card1} alt="" className="mx-auto mb-4" />
             <h1 className="mt-4 text-xl font-semibold font-roboto">
-              Resourceful Workspace Allocation{" "}
+              Resourceful <br /> Workspace Allocation{" "}
             </h1>
             <p className="mt-3 text-center ">
               Effortlessly manage your facility's spatial dynamics with our
@@ -112,7 +112,7 @@ const Dashboard = () => {
           <div className="flex flex-col items-center px-10 py-20 mx-4 my-4 text-center bg-white rounded-lg md:px-10 md:py-24 ">
             <img src={card2} alt="" className="mx-auto mb-4" />
             <h1 className="mt-4 text-xl font-semibold font-roboto">
-              Intuitive Meeting Room Booking
+              Intuitive <br /> Meeting Room Booking
             </h1>
             <p className="mt-3 text-center ">
               Seamlessly schedule and organize meetings with our intuitive
@@ -123,7 +123,7 @@ const Dashboard = () => {
           <div className="flex flex-col items-center px-5 py-20 mx-4 my-4 text-center rounded-lg md:px-10 md:py-24 bg-primary text-secondary ">
             <img src={card3} alt="" className="mx-auto mb-4" />
             <h1 className="mt-4 text-xl font-semibold font-roboto">
-              Real-time Facility Insights
+              Real-time <br /> Facility Insights
             </h1>
             <p className="mt-3 text-center ">
               Effortlessly manage your facility's spatial dynamics with our
