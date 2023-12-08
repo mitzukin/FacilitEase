@@ -33,7 +33,7 @@ const Contact = () => {
             {socials.map((social, index) => (
               <div key={index} className="flex gap-2 px-1 my-4">
                 <div className="">
-                  <img src={social.logo} alt="" className="w-full h-full" />
+                  <img src={social.logo} alt="" className="" />
                 </div>
                 <div className="text-xs">
                   <h3 className="font-bold">{social.title}</h3>
