@@ -105,8 +105,8 @@ const Event = () => {
       <div className="absolute z-10 bg-secondary">
         <Sidebar />
       </div>
-      <div className="flex flex-col pt-32 text-center md:pt-10">
-        <h1 className="mb-2 text-5xl font-bold md:text-7xl">EVENT SCHEDULE </h1>
+      <div className="flex flex-col pt-32 text-center md:pt-10 ">
+        <h1 className="mb-2 text-5xl font-bold md:text-7xl ">EVENT SCHEDULE </h1>
         <p className="mb-5 text-center">
           {" "}
           Schedule your time for a seamless blend of efficiency and enjoyment.
@@ -203,9 +203,9 @@ const Event = () => {
           </form>
         </div>
         <div className="mt-10 text-gray-800 lg:w-3/4">
-          <div className="mb-4">
+          <div className="mb-4 ">
             <h2 className="pl-5 mb-2 text-2xl font-bold ">Event Schedule</h2>
-            <div className="flex flex-col">
+            <div className="flex flex-col overflow-y-auto max-h-[510px]">
               {events.map((event) => (
                 <div
                   key={event.id}
