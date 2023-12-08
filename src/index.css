@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.Card-section {
+    background-image: url('assets/card-section.png');
+    background-size: cover;
+    background-position: center;
+  }
+.CardComponents{
+  background-color: #1E1E1E;
+}
+/* Add this to your CSS or SCSS file */
+.menu-open {
+  transform: translateX(0);
+}
+
+.menu-items-open {
+  display: flex;
+  flex-direction: column;
+}

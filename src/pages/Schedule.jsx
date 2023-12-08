@@ -6,7 +6,7 @@ import Time from "../components/time";
 import { db } from "../firebase";
 import { ref, push, get } from "firebase/database";
 import { useMemo } from "react";
-
+import MobileNavbar from "../components/dashboard/MobileNavbar";
 // Define the Schedule component
 const Schedule = () => {
   // State variables
@@ -249,8 +249,11 @@ const Schedule = () => {
       <div className="absolute z-10 bg-secondary">
         <Sidebar />
       </div>
+      <div className="fixed z-10 w-full bg-secondary">
+        <MobileNavbar />
+      </div>
 
-      <div className="relative flex-1 p-2 ml-12 md:p-8">
+      <div className="relative flex-1 p-2 mt-10 md:p-8">
         <div className="p-5 md:mx-10 lg:p-16">
           <h1 className="mb-4 text-2xl font-semibold md:text-4xl font-roboto">
             Make an Appointment
@@ -260,7 +263,7 @@ const Schedule = () => {
             professional, healthcare, and academic settings.
           </p>
 
-          <div className="flex flex-col justify-center gap-2 mt-10 xl:flex-row">
+          <div className="flex flex-col justify-center gap-10 mt-10 xl:flex-row">
             <div className="flex flex-col-reverse xl:flex-col lg:w-full xl:w-1/4">
               {/* Calendar component */}
               <Calendar onDateChange={handleDateChange} className="shadow-lg" />
@@ -279,7 +282,7 @@ const Schedule = () => {
               </div>
             </div>
 
-            <div className="ml-10 xl:w-3/4">
+            <div className=" xl:w-3/4">
               {/* Time component */}
               <Time
                 onTimeChange={handleTimeChange}
@@ -466,7 +469,7 @@ const Schedule = () => {
               </div>
 
               {/* Display filtered appointments */}
-              <div className="hidden lg:flex">
+              <div className="hidden md:flex">
                 {loading ? (
                   <p>Retrieving Appointments...</p>
                 ) : filteredAppointments.length === 0 ? (
@@ -594,7 +597,7 @@ const Schedule = () => {
                   </div>
                 )}
               </div>
-              <div className="lg:hidden">
+              <div className="md:hidden">
                 {loading ? (
                   <p>Retrieving Appointments...</p>
                 ) : filteredAppointments.length === 0 ? (
@@ -634,40 +637,29 @@ const Schedule = () => {
                         return (
                           <div
                             key={index}
-                            className="px-3 py-5 mb-2 border rounded "
+                            className="px-4 py-6 mb-2 border shadow-md bg-secondary font-roboto"
                           >
-                            <p>
-                              {" "}
-                              <span className="font-semibold">Date: </span>
-                              {formattedDate}
+                            <p className="py-4 mb-2 text-sm font-semibold text-center bg-gray-100 border-b font-roboto">
+                              Date: {formattedDate}
                             </p>
-                            <p>
-                              {" "}
-                              <span className="font-semibold">
-                                Start Time:
-                              </span>{" "}
+                            <p className="py-2 text-sm border-b ">
+                              <span className="font-semibold ">Start Time:</span>{" "}
                               {formattedStartTime}
                             </p>
-                            <p>
-                              {" "}
-                              <span className="font-semibold">End Time: </span>
+                            <p className="py-2 text-sm border-b ">
+                              <span className="font-semibold">End Time:</span>{" "}
                               {formattedEndTime}
                             </p>
-                            <p>
-                              {" "}
-                              <span className="font-semibold">
-                                Building:
-                              </span>{" "}
+                            <p className="py-2 text-sm border-b ">
+                              <span className="font-semibold">Building:</span>{" "}
                               {appointment.buildingName}
                             </p>
-                            <p>
-                              {" "}
-                              <span className="font-semibold">Floor: </span>
+                            <p className="py-2 text-sm border-b ">
+                              <span className="font-semibold">Floor:</span>{" "}
                               {appointment.floor}
                             </p>
-                            <p>
-                              {" "}
-                              <span className="font-semibold">Room: </span>
+                            <p className="py-2 text-sm border-b ">
+                              <span className="font-semibold">Room:</span>{" "}
                               {appointment.room}
                             </p>
                           </div>

@@ -12,7 +12,9 @@ export default {
         "secondary": "#FDFFFC",
         "shade":"#6C757D",
         "light":"#F3F3F3",
-        "bg":"#FBFBFB"
+        "bg":"#FBFBFB",
+        "tertiary":"#1E1E1E",
+        "footer":"#1A1A1A"
       },
     },
   },
