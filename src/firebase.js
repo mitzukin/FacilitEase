@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getDatabase } from 'firebase/database'; 
+import { getDatabase,ref, push, update, get, onValue, set } from 'firebase/database'; 
 
 
 // Your web app's Firebase configuration
@@ -27,4 +27,4 @@ provider.setCustomParameters({
   'login_hint': '0000-000000@rtu.edu.ph'
 });
 
-export { auth, provider,  db };
+export { auth, provider, db, ref, push, update, get, onValue, set };

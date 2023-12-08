@@ -14,7 +14,8 @@ export default {
         "light":"#F3F3F3",
         "bg":"#FBFBFB",
         "tertiary":"#1E1E1E",
-        "footer":"#1A1A1A"
+        "footer":"#1A1A1A",
+        "EventCard":"3F3F3F"
       },
     },
   },

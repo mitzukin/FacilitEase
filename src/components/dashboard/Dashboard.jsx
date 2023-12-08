@@ -46,11 +46,11 @@ const Dashboard = () => {
         <Sidebar />
       </div>
     
-      <div className="flex items-center justify-center h-full px-20 ">
+      <div className="flex items-center justify-center h-full px-20 ml-2">
         <div className="flex flex-col mt-20 bg-white rounded-lg lg:px-56 lg:flex-row">
           <div className="flex flex-col lg:w-1/2">
             <div className="mb-8 font-roboto">
-              <h1 className="px-4 mt-20 text-4xl font-bold lg:text-6xl">
+              <h1 className="px-4 mt-20 text-5xl font-bold lg:text-6xl">
                 Elevate Efficiency: Your All-in-One Facility Management Solution
               </h1>
               <p className="px-4 mt-5 text-shade">
@@ -82,7 +82,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <div className="px-20 mt-56 Card-section">
+      <div className="mt-56 md:px-20 Card-section">
         <div className="mx-auto ">
           <h1 className="px-10 pt-32 text-3xl font-bold text-center text-secondary lg:mx-32 lg:text-5xl font-roboto ">
             {" "}

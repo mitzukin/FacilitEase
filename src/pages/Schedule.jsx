@@ -253,9 +253,9 @@ const Schedule = () => {
         <MobileNavbar />
       </div>
 
-      <div className="relative flex-1 p-2 mt-10 md:p-8">
-        <div className="p-5 md:mx-10 lg:p-16">
-          <h1 className="mb-4 text-2xl font-semibold md:text-4xl font-roboto">
+      <div className="relative flex-1 p-2 mt-16 md:mt-0 md:p-8 ">
+        <div className="p-5 mx-auto text-center md:mx-10 lg:p-16">
+          <h1 className="mb-4 text-4xl font-semibold md:text-6xl font-roboto">
             Make an Appointment
           </h1>
           <p className="font-roboto text-shade">
@@ -274,7 +274,7 @@ const Schedule = () => {
                   Setting an Appointment Guide
                 </h1>
                 {steps.map((step, index) => (
-                  <p key={index} className="mt-2 font-roboto">
+                  <p key={index} className="mt-2 text-left font-roboto ">
                     <span className="font-semibold">{step.title}</span>{" "}
                     {step.content}
                   </p>
