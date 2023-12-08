@@ -116,7 +116,7 @@ const Event = () => {
         {" "}
         <div className="xl:px-5 lg:w-1/2">
           <form
-            className="flex mx-auto flex-col w-[400px] lg:px-5 "
+            className="flex px-5 mx-auto flex-col w-[400px] lg:px-5 "
             onSubmit={handleSubmit}
           >
             <p className="mt-5 mb-10 text-center md:text-sm">
