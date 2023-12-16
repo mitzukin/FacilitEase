@@ -7,11 +7,17 @@ import { FiPenTool } from "react-icons/fi";
 import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import MobileNavbar from "./MobileNavbar";
+import Chatbox from "../chatbox";
+import memo from "../../assets/Memo.png"
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isCollapsed, setCollapsed] = useState(true);
+  
+  const [isChatboxOpen, setIsChatboxOpen] = useState(false);
 
+  const toggleChatbox = () => {
+    setIsChatboxOpen((prev) => !prev);
+  };
   const toggleSidebar = () => {
     setCollapsed(!isCollapsed);
   };
@@ -127,8 +133,18 @@ const Sidebar = () => {
               {!isCollapsed && <span className="ml-2">Contact</span>}
             </div>
           </Link>
+
+
+        
         </div>
         <div className=" text-shade">
+        <button className="w-full" onClick={toggleChatbox}>
+            <div className="flex items-center gap-5 px-6 py-4 text-xs font-semibold rounded-md font-roboto hover:bg-light hover:text-primary">
+              <img src={memo} alt="" className="h-full w-[25px]"/>
+              {!isCollapsed && <span className="ml-2">Memo</span>}
+            </div>
+          </button>
+          {isChatboxOpen && <Chatbox />}
           <div className="px-6 py-4 rounded-md hover:bg-light hover:text-primary">
             <button onClick={handleSignOut} className="flex items-center gap-5">
               <BiLogOut size={18} />

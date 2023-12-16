@@ -174,7 +174,14 @@ const Schedule = () => {
           floor,
           room
         );
+        window.alert("Appointment submitted successfully!");
 
+        // Clear input fields
+        setSelectedDate([]);
+        setSelectedTime([]);
+        setBuildingName("");
+        setFloor("");
+        setRoom("");
         // Fetch and update appointments
         const updatedAppointmentsRef = ref(db, "appointments");
         const snapshot = await get(updatedAppointmentsRef);
@@ -196,6 +203,14 @@ const Schedule = () => {
       }
     } catch (error) {
       console.error("Error submitting appointment:", error.message);
+      window.alert("Error submitting appointment. Please try again.");
+
+      // Clear input fields
+      setSelectedDate([]);
+      setSelectedTime([]);
+      setBuildingName("");
+      setFloor("");
+      setRoom("");
     } finally {
       setLoading(false);
     }
@@ -643,7 +658,9 @@ const Schedule = () => {
                               Date: {formattedDate}
                             </p>
                             <p className="py-2 text-sm border-b ">
-                              <span className="font-semibold ">Start Time:</span>{" "}
+                              <span className="font-semibold ">
+                                Start Time:
+                              </span>{" "}
                               {formattedStartTime}
                             </p>
                             <p className="py-2 text-sm border-b ">

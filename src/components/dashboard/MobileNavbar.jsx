@@ -94,6 +94,7 @@ const MobileNavbar = () => {
           </Link>
 
           <div className=" text-shade">
+            
             <div className="px-6 py-4 rounded-md hover:bg-light hover:text-primary">
               <button
                 onClick={handleSignOut}

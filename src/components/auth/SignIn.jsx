@@ -1,70 +1,76 @@
-import {
-  signInWithEmailAndPassword,
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup, 
-} from "firebase/auth";
 import React, { useState } from "react";
+import { signInWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase";
 import { FaGoogle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/Rtulogo.png";
 import { Link } from "react-router-dom";
+
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // New state for loading
   const navigate = useNavigate();
-  
 
-  
-  const signIn = (e) => {
+  const signIn = async (e) => {
     e.preventDefault();
 
     if (!email.endsWith("@rtu.edu.ph")) {
       setError("Only @rtu.edu.ph emails are allowed.");
+      window.alert("Only @rtu.edu.ph emails are allowed.");
+      setEmail("");
+      setPassword("");
       return;
     }
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log(userCredential);
 
-        // Check if the user is successfully signed in before navigating to the dashboard
-        if (user) {
-          navigate("/dashboard");
-        } else {
-          setError("Invalid email or password");
-        }
-      })
-      .catch((error) => {
-        console.log(error);
+    try {
+      setLoading(true); // Set loading to true when starting the sign-in process
+
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      if (user) {
+        navigate("/dashboard");
+      } else {
         setError("Invalid email or password");
-      });
+        window.alert("Invalid email or password");
+        setEmail("");
+        setPassword("");
+      }
+    } catch (error) {
+      console.log(error);
+      setError("Invalid email or password");
+      window.alert("Invalid email or password");
+      setEmail("");
+      setPassword("");
+    } finally {
+      setLoading(false); // Set loading to false when the sign-in process is complete
+    }
   };
+
   const handleGoogleSignIn = async () => {
     try {
-      const auth = getAuth();  // Get the authentication instance
-  
-      // Create a GoogleAuthProvider instance with hd parameter
+      setLoading(true); // Set loading to true when starting the Google sign-in process
+
+      const authInstance = getAuth();
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
       provider.setCustomParameters({
         'login_hint': '0000-000000@rtu.edu.ph',
-        'hd': 'rtu.edu.ph'  // Specify the Google Apps domain
+        'hd': 'rtu.edu.ph',
       });
-  
-      const result = await signInWithPopup(auth, provider);
-  
-      // The user is signed in, and you can access the user information via result.user
+
+      const result = await signInWithPopup(authInstance, provider);
+
       console.log("Google Sign-In Successful:", result.user);
       navigate("/dashboard");
     } catch (error) {
-      // Handle errors, e.g., user cancels the sign-in, or there's an authentication error
       console.error("Google Sign-In Error:", error.message);
+    } finally {
+      setLoading(false); // Set loading to false when the Google sign-in process is complete
     }
   };
-  
 
   return (
     <div className="flex flex-col lg:flex-row bg-primary">
@@ -75,9 +81,7 @@ const SignIn = () => {
               EMPOWER YOUR DAY{" "}
             </h1>
             <p className="mb-10">
-              {" "}
-              Schedule your time for a seamless blend of efficiency and
-              enjoyment.
+              Schedule your time for a seamless blend of efficiency and enjoyment.
             </p>
             <p className="mt-5 mb-5 md:text-sm">Please Enter your details</p>
             <p className="mb-2 font-normal md:text-sm">Email</p>
@@ -101,8 +105,9 @@ const SignIn = () => {
             <button
               type="submit"
               className="py-3 mt-10 text-sm rounded-md md:text-sm bg-primary text-secondary font-roboto"
+              disabled={loading} // Disable the button when loading is true
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </button>
             <div className="flex items-center justify-center mt-5">
               <hr className="w-1/2 my-4 border-t border-gray-200" />
@@ -114,9 +119,10 @@ const SignIn = () => {
               type="submit"
               className="flex items-center justify-center gap-2 py-3 mt-10 text-sm text-center border rounded-md md:text-sm text-primary font-roboto"
               onClick={handleGoogleSignIn}
+              disabled={loading} // Disable the button when loading is true
             >
               <FaGoogle className="text-lg" />
-              Sign in with Google
+              {loading ? "Signing In with Google..." : "Sign in with Google"}
             </button>
             <div className="flex justify-center gap-2 mt-5 text-sm">
               <p>Don't have an account? </p>{" "}
@@ -142,6 +148,5 @@ const SignIn = () => {
     </div>
   );
 };
-
 
 export default SignIn;

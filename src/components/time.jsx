@@ -14,6 +14,7 @@ const Time = ({ onTimeChange }) => {
       const formattedEndTime = endTime.format("HH:mm");
 
       onTimeChange([formattedStartTime, formattedEndTime]);
+      
     }
   };
 
